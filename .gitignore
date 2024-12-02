@@ -1,0 +1,5 @@
+.DS_Store
+.vscode/launch.json
+test_resources/responseNew.json
+node_modules
+package-lock.json
