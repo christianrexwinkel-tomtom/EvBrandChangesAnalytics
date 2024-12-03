@@ -20,10 +20,6 @@ function readSummaryData(url) {
     });
 }
 
-function readJsonFile(filePath) {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
-
 function findOperators(data) {
     const operators = {};
 
@@ -83,7 +79,7 @@ function findDifferences(oldData, newData) {
         operatorIdChangedNameSame: [],
         operatorNew: [],
         operatorRemoved: [],
-        fuzzyMatches: [] // New property to hold fuzzy matches
+        fuzzyMatches: []
     };
 
     const oldOperators = findOperators(oldData);
@@ -138,23 +134,24 @@ function findDifferences(oldData, newData) {
         }
     });
 
-    // Find fuzzy matches
     differences.fuzzyMatches = findFuzzyMatches(oldOperators, newOperators);
 
     return differences;
 }
 
-const baselineData = readJsonFile(
-    'test_resources/response.json');
-const newData = readSummaryData(
+readSummaryData(
     "https://api.tomtom.com/epp/bulkaccess/api/summary?key=" + process.argv[2])
     .then(data => {
         fs.writeFileSync('test_resources/responseNew.json', data);
 
         const newData = JSON.parse(data);
+        const baselineData = JSON.parse(fs.readFileSync('test_resources/response.json', 'utf8'));
+        
         const differences = findDifferences(baselineData, newData);
-        console.log(JSON.stringify(differences));
+        fs.writeFileSync('test_resources/differences.json', JSON.stringify(differences));
+        
+        console.log("Done");
     })
     .catch(error => {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching/reading/writing data:', error);
     });
